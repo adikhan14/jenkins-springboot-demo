@@ -1,0 +1,52 @@
+pipeline {
+    agent {
+        docker {
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+
+    stages {
+
+        stage('Build and Test') {
+            steps {
+                sh 'cd springboot-app && mvn clean package -DskipTests=false'
+            }
+        }
+
+        stage('Static Code Analysis') {
+            environment {
+                SONAR_URL = "http://65.1.134.229:9000"
+            }
+            steps {
+                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh '''
+                        cd springboot-app && mvn sonar:sonar \
+                            -Dsonar.login=$SONAR_AUTH_TOKEN \
+                            -Dsonar.host.url=${SONAR_URL}
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            environment {
+                DOCKER_IMAGE = "springboot-demo:${BUILD_NUMBER}"
+            }
+            steps {
+                sh 'cd springboot-app && docker build -t ${DOCKER_IMAGE} .'
+                echo "Docker image built: springboot-demo:${BUILD_NUMBER}"
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs above.'
+        }
+    }
+}
