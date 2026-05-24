@@ -1,4 +1,4 @@
-# 04 — Docker Setup
+# 06 — Docker Setup
 
 ## Install Docker
 
@@ -70,19 +70,6 @@ Host Docker Daemon ✅
 ```
 
 > 💡 The socket mount (`-v /var/run/docker.sock:/var/run/docker.sock`) lets the container use the host's Docker daemon. But you still need the Docker CLI binary inside the container.
-
----
-
-## Free Up Docker Space
-
-If disk runs low:
-```bash
-# Remove all unused images, containers, volumes
-sudo docker system prune -a -f
-
-# Check disk after
-df -h
-```
 
 ---
 
