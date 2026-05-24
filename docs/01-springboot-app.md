@@ -1,120 +1,27 @@
-# 06 — Spring Boot Application
+# 01 — Spring Boot App & GitHub
 
-## Project Details
+## Create Spring Boot Project
 
-| Detail | Value |
-|--------|-------|
-| **Framework** | Spring Boot 3.2.5 |
-| **Java Version** | 17 |
-| **Build Tool** | Maven 3.9.6 |
-| **Server Port** | 8081 |
+1. Go to [start.spring.io](https://start.spring.io)
+2. Configure:
 
----
+| Setting | Value |
+|---------|-------|
+| **Project** | Maven |
+| **Language** | Java |
+| **Spring Boot** | 3.2.5 |
+| **Java** | 17 |
+| **Dependency** | Spring Web |
 
-## Project Structure
-
-```
-springboot-app/
-├── Dockerfile
-├── Jenkinsfile
-├── pom.xml
-└── src/
-    └── main/
-        ├── java/com/example/demo/
-        │   ├── DemoApplication.java
-        │   └── AppController.java
-        └── resources/
-            └── application.properties
-```
+3. Generate and extract the project
 
 ---
 
 ## REST Endpoints
 
-| Endpoint | Method | Response |
-|----------|--------|----------|
-| `/hello` | GET | `Hello, World!` |
-| `/heartbeat` | GET | `OK` |
-
----
-
-## pom.xml
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
-        <relativePath/>
-    </parent>
-
-    <groupId>com.example</groupId>
-    <artifactId>demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>demo</name>
-
-    <properties>
-        <java.version>17</java.version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
----
-
-## DemoApplication.java
+Add two endpoints in `AppController.java`:
 
 ```java
-package com.example.demo;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-public class DemoApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
-    }
-}
-```
-
----
-
-## AppController.java
-
-```java
-package com.example.demo;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 public class AppController {
 
@@ -130,6 +37,11 @@ public class AppController {
 }
 ```
 
+| Endpoint | Response |
+|----------|----------|
+| `/hello` | `Hello, World!` |
+| `/heartbeat` | `OK` |
+
 ---
 
 ## application.properties
@@ -139,11 +51,11 @@ spring.application.name=demo
 server.port=8081
 ```
 
-> 💡 Port **8081** used to avoid conflict with Jenkins on **8080**.
-
 ---
 
 ## Dockerfile
+
+Create a `Dockerfile` in the project root:
 
 ```dockerfile
 FROM eclipse-temurin:17-jre-alpine
@@ -153,136 +65,15 @@ EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
-| Line | Purpose |
-|------|---------|
-| `FROM eclipse-temurin:17-jre-alpine` | Lightweight Java 17 base image |
-| `WORKDIR /app` | Set working directory |
-| `COPY target/*.jar app.jar` | Copy built JAR from Maven |
-| `EXPOSE 8081` | Expose app port |
-| `ENTRYPOINT` | Run the JAR |
-
 ---
 
-## Build & Run Locally
+## Push to GitHub
 
 ```bash
-cd springboot-app
-
-# Build JAR
-mvn clean package -DskipTests
-
-# Run with Maven
-mvn spring-boot:run
-
-# OR build & run Docker image
-docker build -t springboot-demo .
-docker run -p 8081:8081 springboot-demo
-```
-
-Test endpoints:
-```bash
-curl http://localhost:8081/hello
-curl http://localhost:8081/heartbeat
-```
-# 07 — GitHub Setup
-
-## Initialize Git Repository
-
-```bash
-cd "/Users/apple/Jenkins Pipeline"
 git init
-```
-
----
-
-## Add .gitignore
-
-```bash
-# Root .gitignore — exclude sensitive files
-echo "*.pem" >> .gitignore
-```
-
-> ⚠️ NEVER commit `.pem` files to GitHub — bots scan public repos for keys within seconds!
-
----
-
-## First Commit
-
-```bash
 git add .
 git commit -m "initial commit"
-```
-
----
-
-## Remove PEM File If Accidentally Committed
-
-```bash
-# Remove from git tracking (keeps file on disk)
-git rm --cached aws-pem-file.pem
-
-# Add to gitignore
-echo "*.pem" >> .gitignore
-git add .gitignore
-
-# Amend commit to remove it
-git commit --amend -m "initial commit"
-
-# Verify it's gone
-git ls-files | grep pem   # should return nothing
-```
-
----
-
-## Create GitHub Repo via CLI
-
-```bash
-# Using GitHub CLI (gh)
 gh repo create jenkins-springboot-demo --public --source=. --remote=origin --push
 ```
 
-**Result:**
-```
-https://github.com/adikhan14/jenkins-springboot-demo
-```
-
----
-
-## Push Changes
-
-```bash
-git add .
-git commit -m "your message"
-git push origin main
-```
-
----
-
-## Repository Details
-
-| Detail | Value |
-|--------|-------|
-| **Repo URL** | https://github.com/adikhan14/jenkins-springboot-demo |
-| **Owner** | adikhan14 |
-| **Branch** | main |
-| **Visibility** | Public |
-
----
-
-## Files in Repository
-
-```
-jenkins-springboot-demo/
-├── .gitignore
-└── springboot-app/
-    ├── Dockerfile
-    ├── Jenkinsfile
-    ├── pom.xml
-    └── src/
-        └── main/
-            ├── java/com/example/demo/
-            │   ├── DemoApplication.java
-            │   └── AppController.java
-            └── resources/
-                └── application.properties
-```
+> 💡 Uses GitHub CLI (`gh`). Make sure you're logged in with `gh auth login` first.
